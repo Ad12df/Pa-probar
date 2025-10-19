@@ -13,14 +13,17 @@ BiblioDigital es una aplicación web de biblioteca digital personal que permite 
 - **Favoritos** para marcar libros preferidos
 - **Lector integrado** con ajustes personalizables
 
-### ✅ Autenticación Local
+### ✅ Autenticación Local (Opcional)
+- **Acceso libre**: Puedes explorar el catálogo, favoritos, biblioteca y ajustes sin iniciar sesión
+- **Modo invitado**: Navega la app como invitado sin restricciones
+- **Inicio de sesión opcional**: Solo necesario para subir tus propios libros
 - Registro e inicio de sesión usando localStorage
 - No requiere servidor de autenticación
 - Datos de usuario almacenados localmente en el navegador
 
 ### ✅ Configuración Personalizable
 - **Perfil de usuario**: Edición de nombre y correo
-- **Temas visuales**: 9 temas diferentes (Original, Claymorphism, Glassmorphism, etc.)
+- **Temas visuales**: 6 temas modernos (Clásico, Oscuro, Sepia, Océano, Bosque, Púrpura)
 - **Tamaño de fuente**: Global y del lector
 - **Tema del lector**: Claro, Oscuro, Sepia
 - **Notificaciones**: Preferencias de avisos y recordatorios
@@ -105,15 +108,18 @@ BiblioDigital es una aplicación web de biblioteca digital personal que permite 
 ## 🎨 Características de Diseño
 
 ### Temas Disponibles
-1. **BiblioDigital Clásico** - Profesional (por defecto)
-2. **Claymorphism** - Suave y táctil
-3. **Glassmorphism** - Cristal moderno
-4. **Neumorphism** - Sutil y elegante
-5. **Brutalism** - Audaz y minimalista
-6. **Cyberpunk** - Neón futurista
-7. **Midnight** - Oscuro profesional
-8. **Pastel Dreams** - Suave y cálido
-9. **Ocean Breeze** - Fresco y limpio
+1. **Clásico** - Tema Original Profesional (por defecto)
+2. **Oscuro** - Modo Nocturno con paleta dark
+3. **Sepia** - Estilo Vintage cálido
+4. **Océano** - Azul Refrescante y limpio
+5. **Bosque** - Verde Natural relajante
+6. **Púrpura** - Sueño Moderno vibrante
+
+Cada tema incluye:
+- Paleta de colores completa
+- Gradientes personalizados
+- Sombras y efectos específicos
+- Estilos de sidebar, cards y modales adaptados
 
 ### Responsive Design
 - **Desktop**: Layout completo con sidebar fija
@@ -236,6 +242,13 @@ Este proyecto es de código abierto y está disponible para fines educativos.
 ---
 
 ## 🔄 Historial de Cambios
+
+### Octubre 2025 - Versión 2.1
+- ✅ **Acceso libre sin autenticación**: Ahora puedes explorar catálogo, favoritos, biblioteca y ajustes sin iniciar sesión
+- ✅ **Modo invitado mejorado**: Interfaz adaptada para usuarios no autenticados con indicador "Invitado"
+- ✅ **Botón inteligente de subir**: Muestra "Inicia sesión para subir" o "Subir libro" según el estado de sesión
+- ✅ **Nuevos temas modernos**: 6 temas visuales completamente rediseñados (Clásico, Oscuro, Sepia, Océano, Bosque, Púrpura)
+- ✅ **Mejoras de UX**: Flujo de autenticación simplificado y más intuitivo
 
 ### Octubre 2025 - Versión 2.0
 - ✅ **Migración a IndexedDB**: Implementado almacenamiento de PDFs en IndexedDB para superar el límite de 5MB de localStorage

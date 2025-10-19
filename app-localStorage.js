@@ -122,13 +122,12 @@ const AuthService = {
     handlePageAuth() {
         const path = window.location.pathname;
         const isAuthPage = path.includes('login.html');
-        const isPublicPage = path.includes('index.html') || path === '/' || path.endsWith('/public/');
 
+        // Si estás en login y ya estás autenticado, redirigir a inicio
         if (isAuthPage && this.isAuthenticated()) {
             window.location.href = 'index.html';
-        } else if (!isPublicPage && !isAuthPage && !this.isAuthenticated()) {
-            window.location.href = 'login.html';
         }
+        // Permitir acceso libre a todas las demás páginas
     },
 
     signUp(name, email, password) {
@@ -178,21 +177,70 @@ const AuthService = {
     },
 
     updateUserInfoUI() {
-        if (!this.currentUser) return;
-
         const userName = document.getElementById('userName');
         const userEmail = document.getElementById('userEmail');
         const userInitials = document.getElementById('userInitials');
         const profileName = document.getElementById('profileName');
         const profileEmail = document.getElementById('profileEmail');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const sidebarFooter = document.querySelector('.sidebar-footer');
 
-        if (userName) userName.textContent = this.currentUser.name;
-        if (userEmail) userEmail.textContent = this.currentUser.email;
-        if (profileName) profileName.value = this.currentUser.name;
-        if (profileEmail) profileEmail.value = this.currentUser.email;
-        if (userInitials) {
-            const initials = (this.currentUser.name || '').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-            userInitials.textContent = initials || 'U';
+        if (this.currentUser) {
+            if (userName) userName.textContent = this.currentUser.name;
+            if (userEmail) userEmail.textContent = this.currentUser.email;
+            if (profileName) profileName.value = this.currentUser.name;
+            if (profileEmail) profileEmail.value = this.currentUser.email;
+            if (userInitials) {
+                const initials = (this.currentUser.name || '').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                userInitials.textContent = initials || 'U';
+            }
+            
+            if (sidebarFooter && !document.querySelector('.user-profile')) {
+                const userProfile = document.createElement('div');
+                userProfile.className = 'user-profile';
+                userProfile.innerHTML = `
+                    <div class="user-avatar">
+                        <span id="userInitials">U</span>
+                    </div>
+                    <div class="user-info">
+                        <p class="user-name" id="userName">${this.currentUser.name}</p>
+                        <p class="user-email" id="userEmail">${this.currentUser.email}</p>
+                    </div>
+                `;
+                sidebarFooter.insertBefore(userProfile, logoutBtn);
+            }
+            
+            if (logoutBtn) {
+                logoutBtn.style.display = 'flex';
+                logoutBtn.innerHTML = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    Cerrar sesión
+                `;
+                logoutBtn.onclick = () => AuthService.signOut();
+            }
+        } else {
+            if (userName) userName.textContent = 'Invitado';
+            if (userEmail) userEmail.textContent = 'No has iniciado sesión';
+            if (userInitials) userInitials.textContent = 'I';
+            
+            if (logoutBtn) {
+                logoutBtn.style.display = 'flex';
+                logoutBtn.innerHTML = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                        <polyline points="10 17 15 12 10 7"></polyline>
+                        <line x1="15" y1="12" x2="3" y2="12"></line>
+                    </svg>
+                    Iniciar sesión
+                `;
+                logoutBtn.onclick = () => {
+                    window.location.href = 'login.html';
+                };
+            }
         }
     },
 
@@ -540,9 +588,29 @@ function filterBooks() {
 function setupUploadButton() {
     const uploadBtn = document.getElementById('uploadBookBtn');
     if (uploadBtn) {
+        // Actualizar el texto del botón según el estado de autenticación
+        if (AuthService.isAuthenticated()) {
+            uploadBtn.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                Subir Libro
+            `;
+        } else {
+            uploadBtn.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                    <polyline points="10 17 15 12 10 7"></polyline>
+                    <line x1="15" y1="12" x2="3" y2="12"></line>
+                </svg>
+                Inicia sesión para subir
+            `;
+        }
+        
         uploadBtn.addEventListener('click', () => {
             if (!AuthService.isAuthenticated()) {
-                alert('Debes iniciar sesión para subir un libro');
                 window.location.href = 'login.html';
                 return;
             }
