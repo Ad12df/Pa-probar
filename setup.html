@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración de Firebase - BiblioDigital</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 1rem;
+            padding: 3rem;
+            max-width: 800px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: #1a365d;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        h2 {
+            color: #0d9488;
+            font-size: 1.5rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        p {
+            color: #4b5563;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+        
+        .step {
+            background: #f9fafb;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #0d9488;
+        }
+        
+        .step h3 {
+            color: #1a365d;
+            margin-bottom: 0.5rem;
+        }
+        
+        code {
+            background: #1f2937;
+            color: #10b981;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #0d9488, #14b8a6);
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .alert {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+        }
+        
+        .alert-success {
+            background: #d1fae5;
+            border-color: #10b981;
+        }
+        
+        ul {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        li {
+            color: #4b5563;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Configuración de Firebase</h1>
+        <p>¡Bienvenido a BiblioDigital! Tu aplicación está casi lista. Solo necesitas configurar Firebase para que funcione completamente.</p>
+        
+        <div class="alert">
+            <strong>⚠️ Importante:</strong> Debes configurar Firebase antes de usar la aplicación. Sin Firebase, la aplicación no funcionará.
+        </div>
+        
+        <h2>Pasos Rápidos:</h2>
+        
+        <div class="step">
+            <h3>1. Crea tu proyecto Firebase</h3>
+            <p>Ve a <a href="https://console.firebase.google.com/" target="_blank">Firebase Console</a> y crea un nuevo proyecto llamado "BiblioDigital"</p>
+        </div>
+        
+        <div class="step">
+            <h3>2. Registra tu aplicación web</h3>
+            <p>En tu proyecto Firebase, haz clic en el ícono Web <code>&lt;/&gt;</code> y registra tu app</p>
+        </div>
+        
+        <div class="step">
+            <h3>3. Copia tus credenciales</h3>
+            <p>Firebase te mostrará un objeto de configuración. Cópialo.</p>
+        </div>
+        
+        <div class="step">
+            <h3>4. Pega las credenciales</h3>
+            <p>Abre el archivo <code>firebase-config.js</code> y reemplaza los valores placeholder con tus credenciales reales</p>
+        </div>
+        
+        <div class="step">
+            <h3>5. Habilita servicios</h3>
+            <p>En Firebase Console, habilita:</p>
+            <ul>
+                <li><strong>Authentication</strong> → Email/Password</li>
+                <li><strong>Firestore Database</strong> → Modo de prueba</li>
+                <li><strong>Storage</strong> → Reglas predeterminadas</li>
+            </ul>
+        </div>
+        
+        <div class="alert alert-success">
+            <strong>✅ ¿Ya configuraste Firebase?</strong> ¡Perfecto! Ahora puedes usar tu aplicación.
+        </div>
+        
+        <h2>📖 Instrucciones Detalladas</h2>
+        <p>Para instrucciones paso a paso con imágenes, consulta el archivo <code>INSTRUCCIONES_FIREBASE.md</code> en la carpeta de tu proyecto.</p>
+        
+        <h2>🚀 ¿Listo para comenzar?</h2>
+        <a href="index.html" class="btn">Ir a BiblioDigital</a>
+        
+        <h2 style="margin-top: 3rem;">📱 Características de tu App</h2>
+        <ul>
+            <li>✅ <strong>Responsive Design</strong> - Funciona en móvil, tablet y PC</li>
+            <li>✅ <strong>Acceso sin login</strong> - Puedes ver la página principal sin iniciar sesión</li>
+            <li>✅ <strong>Firebase Integration</strong> - Base de datos en la nube</li>
+            <li>✅ <strong>Upload de Libros</strong> - Sube portadas e archivos PDF</li>
+            <li>✅ <strong>Sistema de Favoritos</strong> - Guarda tus libros preferidos</li>
+            <li>✅ <strong>Lector Personalizable</strong> - Ajusta tamaño de fuente y tema</li>
+        </ul>
+    </div>
+</body>
+</html>

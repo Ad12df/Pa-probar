@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BiblioDigital - Lector</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="reader-page">
+    <!-- Reader Header -->
+    <header class="reader-header">
+        <div class="reader-nav">
+            <button class="btn btn-text" onclick="window.location.href='catalog.html'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"></path>
+                </svg>
+                Volver al catálogo
+            </button>
+            <h1 class="reader-book-title" id="readerTitle">Cargando...</h1>
+            <div class="reader-controls">
+                <button class="btn btn-icon" onclick="decreaseFontSize()" title="Disminuir fuente">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </button>
+                <button class="btn btn-icon" onclick="increaseFontSize()" title="Aumentar fuente">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </button>
+                <button class="btn btn-icon" onclick="toggleTheme()" title="Cambiar tema">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Reader Content -->
+    <main class="reader-content" id="readerContent">
+        <div class="reader-text">
+            <p>Cargando contenido del libro...</p>
+        </div>
+    </main>
+
+    <!-- Reader Footer -->
+    <footer class="reader-footer">
+        <div class="progress-container">
+            <span class="progress-label">Progreso de lectura</span>
+            <div class="progress-bar-wrapper">
+                <div class="progress-bar" id="readingProgress" style="width: 0%"></div>
+            </div>
+            <span class="progress-percentage" id="progressPercentage">0%</span>
+        </div>
+    </footer>
+
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    
+    <!-- Firebase Configuration -->
+    <script src="firebase-config.js"></script>
+    
+    <!-- App Logic -->
+    <script src="app-firebase.js"></script>
+</body>
+</html>
