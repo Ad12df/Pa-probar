@@ -41,10 +41,16 @@ BiblioDigital es una aplicación web de biblioteca digital personal que permite 
 
 ### Almacenamiento
 - **localStorage** - Almacenamiento local del navegador para:
-  - Datos de usuario
-  - Libros y contenido
+  - Datos de usuario (autenticación)
+  - Metadatos de libros (título, autor, categoría, descripción)
   - Favoritos
   - Configuración personalizada
+  - Portadas de libros (imágenes en base64, ~100-500KB)
+- **IndexedDB** - Base de datos del navegador para:
+  - Archivos PDF completos (hasta 50MB por archivo)
+  - Permite almacenar archivos binarios grandes que exceden el límite de localStorage (~5MB total)
+  - Base de datos: BiblioDigitalDB
+  - Object Store: pdfs (clave: bookId)
 
 ### Servidor
 - **Python 3** - Servidor HTTP simple
@@ -57,14 +63,14 @@ BiblioDigital es una aplicación web de biblioteca digital personal que permite 
 ├── index.html              # Página de inicio
 ├── login.html              # Página de autenticación
 ├── catalog.html            # Catálogo de libros
+├── library.html            # Mi Biblioteca (libros del usuario)
 ├── favorites.html          # Libros favoritos
 ├── reader.html             # Lector de libros
 ├── settings.html           # Configuración
 ├── styles.css              # Estilos globales con responsive design
-├── app-localStorage.js     # Lógica principal (localStorage)
-├── firebase-config.js      # Configuración (vacío, para compatibilidad)
+├── app-localStorage.js     # Lógica principal (localStorage + IndexedDB)
+├── firebase-config.js      # Configuración de almacenamiento local
 ├── server.py               # Servidor HTTP Python
-├── libro/                  # Carpeta para recursos de libros
 ├── .gitignore              # Archivos ignorados por Git
 └── replit.md               # Esta documentación
 ```
@@ -82,14 +88,19 @@ BiblioDigital es una aplicación web de biblioteca digital personal que permite 
 
 ### Almacenamiento Local
 
-Todos los datos se guardan en localStorage con las siguientes claves:
-
+**localStorage** - Metadatos y configuración:
 - `biblioUser` - Información del usuario actual
-- `biblioBooks` - Array de libros
+- `biblioBooks` - Array de metadatos de libros (NO incluye PDFs)
 - `userSettings` - Configuración personalizada
 - `biblioFavorites` - IDs de libros favoritos
 - `userPassword` - Contraseña (solo para demostración)
 - `currentBook` - Libro siendo leído actualmente
+
+**IndexedDB (BiblioDigitalDB)** - Archivos PDF:
+- Object Store: `pdfs`
+- Clave: `bookId` (ID único del libro)
+- Valor: `pdfDataUrl` (archivo PDF en formato base64)
+- Límite práctico: ~50MB por archivo
 
 ## 🎨 Características de Diseño
 
@@ -112,15 +123,25 @@ Todos los datos se guardan en localStorage con las siguientes claves:
 
 ## 📝 Notas de Desarrollo
 
-### Por qué localStorage en lugar de Firebase
+### Por qué localStorage + IndexedDB en lugar de Firebase
 
-El proyecto originalmente estaba configurado para Firebase, pero se modificó para usar localStorage por las siguientes razones:
+El proyecto originalmente estaba configurado para Firebase, pero se modificó para usar almacenamiento local por las siguientes razones:
 
 1. **No requiere credenciales de API**: Funciona sin configuración externa
 2. **Totalmente local**: Los datos permanecen en el navegador del usuario
 3. **Sin costos**: No hay límites ni tarifas de Firebase
 4. **Privacidad**: Los datos nunca salen del dispositivo del usuario
 5. **Simplicidad**: Más fácil de entender y mantener
+
+### Por qué IndexedDB para PDFs
+
+IndexedDB se utiliza específicamente para archivos PDF porque:
+
+1. **localStorage tiene límite de ~5MB**: No suficiente para PDFs
+2. **IndexedDB soporta almacenamientos grandes**: >50MB por archivo
+3. **Mejor rendimiento**: Optimizado para archivos binarios
+4. **Asíncrono**: No bloquea el hilo principal del navegador
+5. **API moderna**: Promesas nativas con async/await
 
 ### Servidor de Desarrollo
 
@@ -195,16 +216,38 @@ Este proyecto demuestra:
 
 Este proyecto es de código abierto y está disponible para fines educativos.
 
-## 🤝 Contribuciones
+## 🚀 Mejoras Futuras
 
-Para mejorar este proyecto:
-1. Implementar lectura de PDFs real
-2. Agregar sincronización con cloud storage
-3. Mejorar el lector con paginación
-4. Añadir estadísticas de lectura
-5. Implementar modo sin conexión con Service Workers
+### Recomendaciones Técnicas
+1. **Modo privado del navegador**: Implementar fallback si IndexedDB no está disponible
+2. **Optimización de memoria**: Considerar almacenar PDFs como Blob en lugar de base64 para reducir overhead
+3. **Monitoreo de rendimiento**: Agregar métricas para PDFs grandes (>10MB)
+4. **Tests de integración**: Cubrir flujos completos upload → edit → read → delete
+
+### Funcionalidades Adicionales
+1. **Lectura de PDFs real**: Integrar PDF.js para visualización avanzada
+2. **Sincronización cloud**: Opcional con Google Drive o Dropbox
+3. **Lector mejorado**: Paginación, marcadores, anotaciones
+4. **Estadísticas de lectura**: Tiempo leído, progreso, libros completados
+5. **Service Workers**: Modo sin conexión completo
+6. **Exportar/Importar**: Backup de biblioteca completa
+7. **Búsqueda de contenido**: Buscar texto dentro de los PDFs
+
+---
+
+## 🔄 Historial de Cambios
+
+### Octubre 2025 - Versión 2.0
+- ✅ **Migración a IndexedDB**: Implementado almacenamiento de PDFs en IndexedDB para superar el límite de 5MB de localStorage
+- ✅ **Bibliotecas por usuario**: Cada usuario ahora tiene su propia biblioteca de libros separada
+- ✅ **Página "Mi Biblioteca"**: Nueva sección para gestionar únicamente los libros subidos por el usuario
+- ✅ **Funcionalidad completa de PDFs**: Subir, editar, eliminar y leer archivos PDF reales (hasta 50MB)
+- ✅ **Corrección de logout**: El botón de cerrar sesión ahora funciona correctamente
+- ✅ **Servidor optimizado**: Configuración SO_REUSEADDR para mejor manejo de puertos
+- ✅ **Limpieza de código**: Eliminados archivos obsoletos de Firebase
 
 ---
 
 **Desarrollado para Replit** 🚀
 Fecha: Octubre 2025
+Versión: 2.0

@@ -40,6 +40,7 @@ print(f"""
 ╚════════════════════════════════════════════════════════════╝
 """)
 
+socketserver.TCPServer.allow_reuse_address = True
 with socketserver.TCPServer(("0.0.0.0", PORT), Handler) as httpd:
     try:
         httpd.serve_forever()

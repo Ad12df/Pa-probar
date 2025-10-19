@@ -26,6 +26,82 @@ const STORAGE_KEYS = {
     FAVORITES: 'biblioFavorites'
 };
 
+// ========== INDEXEDDB SETUP FOR PDFS ========== //
+let db = null;
+
+function initIndexedDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open('BiblioDigitalDB', 1);
+        
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+            db = request.result;
+            resolve(db);
+        };
+        
+        request.onupgradeneeded = (event) => {
+            const database = event.target.result;
+            if (!database.objectStoreNames.contains('pdfs')) {
+                database.createObjectStore('pdfs', { keyPath: 'bookId' });
+            }
+        };
+    });
+}
+
+function savePDFToIndexedDB(bookId, pdfDataUrl) {
+    return new Promise((resolve, reject) => {
+        if (!db) {
+            reject(new Error('Database not initialized'));
+            return;
+        }
+        
+        const transaction = db.transaction(['pdfs'], 'readwrite');
+        const store = transaction.objectStore('pdfs');
+        const request = store.put({ bookId: bookId, pdfData: pdfDataUrl });
+        
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+    });
+}
+
+function getPDFFromIndexedDB(bookId) {
+    return new Promise((resolve, reject) => {
+        if (!db) {
+            reject(new Error('Database not initialized'));
+            return;
+        }
+        
+        const transaction = db.transaction(['pdfs'], 'readonly');
+        const store = transaction.objectStore('pdfs');
+        const request = store.get(bookId);
+        
+        request.onsuccess = () => {
+            if (request.result) {
+                resolve(request.result.pdfData);
+            } else {
+                resolve(null);
+            }
+        };
+        request.onerror = () => reject(request.error);
+    });
+}
+
+function deletePDFFromIndexedDB(bookId) {
+    return new Promise((resolve, reject) => {
+        if (!db) {
+            reject(new Error('Database not initialized'));
+            return;
+        }
+        
+        const transaction = db.transaction(['pdfs'], 'readwrite');
+        const store = transaction.objectStore('pdfs');
+        const request = store.delete(bookId);
+        
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+    });
+}
+
 // ========== AUTH SERVICE (LocalStorage Version) ========== //
 const AuthService = {
     currentUser: null,
@@ -96,6 +172,7 @@ const AuthService = {
     signOut() {
         if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
             this.currentUser = null;
+            localStorage.removeItem(STORAGE_KEYS.USER);
             window.location.href = 'login.html';
         }
     },
@@ -255,9 +332,9 @@ function saveBooksToStorage() {
     localStorage.setItem(STORAGE_KEYS.BOOKS, JSON.stringify(booksData));
 }
 
-function addBook(bookData) {
+function addBook(bookData, bookId = null) {
     const newBook = {
-        id: 'book_' + Date.now(),
+        id: bookId || 'book_' + Date.now(),
         ...bookData,
         uploadedBy: AuthService.currentUser?.uid || 'anonymous',
         createdAt: new Date().toISOString()
@@ -265,6 +342,43 @@ function addBook(bookData) {
     booksData.unshift(newBook);
     saveBooksToStorage();
     return newBook;
+}
+
+function updateBook(bookId, updatedData) {
+    const index = booksData.findIndex(book => book.id === bookId);
+    if (index !== -1) {
+        booksData[index] = { ...booksData[index], ...updatedData };
+        saveBooksToStorage();
+        return booksData[index];
+    }
+    return null;
+}
+
+async function deleteBook(bookId) {
+    const index = booksData.findIndex(book => book.id === bookId);
+    if (index !== -1) {
+        const book = booksData[index];
+        if (book.hasPDF) {
+            try {
+                await deletePDFFromIndexedDB(bookId);
+            } catch (error) {
+                console.error('Error deleting PDF from IndexedDB:', error);
+            }
+        }
+        booksData.splice(index, 1);
+        saveBooksToStorage();
+        return true;
+    }
+    return false;
+}
+
+function getUserBooks() {
+    if (!AuthService.isAuthenticated()) return [];
+    return booksData.filter(book => book.uploadedBy === AuthService.currentUser.uid);
+}
+
+function getAllBooks() {
+    return booksData;
 }
 
 // ========== FAVORITES MANAGEMENT ========== //
@@ -443,7 +557,7 @@ function openUploadModal() {
     modal.id = 'uploadModal';
     modal.innerHTML = `
         <div class="modal-overlay" onclick="closeUploadModal()"></div>
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 800px;">
             <button class="modal-close" onclick="closeUploadModal()">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -490,15 +604,14 @@ function openUploadModal() {
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">URL de Portada (opcional)</label>
-                        <input type="url" name="coverUrl" class="form-input" placeholder="https://ejemplo.com/imagen.jpg">
-                        <p class="form-hint">O sube una imagen desde tu dispositivo:</p>
-                        <input type="file" name="cover" accept="image/*" class="form-input">
+                        <label class="form-label">Portada (imagen) *</label>
+                        <input type="file" name="cover" id="coverFileInput" accept="image/*" class="form-input" required>
+                        <p class="form-hint">Sube una imagen de portada (JPG, PNG, etc.)</p>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Contenido del libro</label>
-                        <textarea name="content" class="form-input" rows="6" placeholder="Escribe o pega el contenido del libro aquí..."></textarea>
-                        <p class="form-hint">Nota: Los archivos PDF se almacenarán localmente en tu navegador</p>
+                        <label class="form-label">Archivo PDF *</label>
+                        <input type="file" name="pdf" id="pdfFileInput" accept="application/pdf" class="form-input" required>
+                        <p class="form-hint">Sube el archivo PDF del libro (máx. 50MB)</p>
                     </div>
                     <div style="display: flex; gap: 1rem; margin-top: 1rem;">
                         <button type="submit" class="btn btn-primary" style="flex: 1;">Subir Libro</button>
@@ -522,7 +635,7 @@ function closeUploadModal() {
     }
 }
 
-function handleUploadSubmit(e) {
+async function handleUploadSubmit(e) {
     e.preventDefault();
     
     if (!AuthService.isAuthenticated()) {
@@ -535,36 +648,33 @@ function handleUploadSubmit(e) {
     const formData = new FormData(form);
     const submitBtn = form.querySelector('button[type="submit"]');
     
+    const coverFile = formData.get('cover');
+    const pdfFile = formData.get('pdf');
+    
+    if (!coverFile || coverFile.size === 0) {
+        alert('Debes seleccionar una imagen de portada');
+        return;
+    }
+    
+    if (!pdfFile || pdfFile.size === 0) {
+        alert('Debes seleccionar un archivo PDF');
+        return;
+    }
+    
+    if (pdfFile.size > 50 * 1024 * 1024) {
+        alert('El archivo PDF es demasiado grande. Máximo 50MB');
+        return;
+    }
+    
     submitBtn.disabled = true;
     submitBtn.textContent = 'Subiendo...';
 
-    const coverFile = formData.get('cover');
-    const coverUrl = formData.get('coverUrl');
-    
-    // Si hay un archivo de imagen, convertirlo a base64
-    if (coverFile && coverFile.size > 0) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const bookData = {
-                title: formData.get('title'),
-                author: formData.get('author'),
-                category: formData.get('category'),
-                description: formData.get('description'),
-                pages: parseInt(formData.get('pages')) || 0,
-                year: parseInt(formData.get('year')) || new Date().getFullYear(),
-                coverUrl: e.target.result,
-                pdfUrl: '',
-                content: formData.get('content') || 'Contenido del libro...'
-            };
-            
-            addBook(bookData);
-            alert('¡Libro subido exitosamente!');
-            closeUploadModal();
-            loadBooksFromStorage();
-            displayBooks(booksData);
-        };
-        reader.readAsDataURL(coverFile);
-    } else {
+    try {
+        const coverDataUrl = await readFileAsDataURL(coverFile);
+        const pdfDataUrl = await readFileAsDataURL(pdfFile);
+        
+        const bookId = 'book_' + Date.now();
+        
         const bookData = {
             title: formData.get('title'),
             author: formData.get('author'),
@@ -572,20 +682,203 @@ function handleUploadSubmit(e) {
             description: formData.get('description'),
             pages: parseInt(formData.get('pages')) || 0,
             year: parseInt(formData.get('year')) || new Date().getFullYear(),
-            coverUrl: coverUrl || 'https://via.placeholder.com/280x320?text=' + encodeURIComponent(formData.get('title')),
+            coverUrl: coverDataUrl,
             pdfUrl: '',
-            content: formData.get('content') || 'Contenido del libro...'
+            hasPDF: true,
+            content: 'PDF: ' + pdfFile.name
         };
         
-        addBook(bookData);
+        const newBook = addBook(bookData, bookId);
+        
+        await savePDFToIndexedDB(newBook.id, pdfDataUrl);
+        
         alert('¡Libro subido exitosamente!');
         closeUploadModal();
         loadBooksFromStorage();
         displayBooks(booksData);
+    } catch (error) {
+        console.error('Error uploading book:', error);
+        alert('Error al subir el libro: ' + error.message);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Subir Libro';
+    }
+}
+
+function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = (e) => reject(new Error('Error reading file'));
+        reader.readAsDataURL(file);
+    });
+}
+
+// ========== EDIT & DELETE FUNCTIONS ========== //
+function openEditModal(bookId) {
+    const book = booksData.find(b => b.id === bookId);
+    if (!book) return;
+    
+    if (book.uploadedBy !== AuthService.currentUser?.uid) {
+        alert('Solo puedes editar tus propios libros');
+        return;
     }
     
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Subir Libro';
+    const modal = document.createElement('div');
+    modal.className = 'modal active';
+    modal.id = 'editModal';
+    modal.innerHTML = `
+        <div class="modal-overlay" onclick="closeEditModal()"></div>
+        <div class="modal-content" style="max-width: 800px;">
+            <button class="modal-close" onclick="closeEditModal()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            <div class="modal-body" style="padding: 2rem;">
+                <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 1.5rem;">Editar Libro</h2>
+                <form id="editForm" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <div class="form-group">
+                        <label class="form-label">Título *</label>
+                        <input type="text" name="title" value="${book.title}" required class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Autor *</label>
+                        <input type="text" name="author" value="${book.author}" required class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Categoría *</label>
+                        <select name="category" required class="form-select">
+                            <option value="Ficción" ${book.category === 'Ficción' ? 'selected' : ''}>Ficción</option>
+                            <option value="No Ficción" ${book.category === 'No Ficción' ? 'selected' : ''}>No Ficción</option>
+                            <option value="Ciencia" ${book.category === 'Ciencia' ? 'selected' : ''}>Ciencia</option>
+                            <option value="Tecnología" ${book.category === 'Tecnología' ? 'selected' : ''}>Tecnología</option>
+                            <option value="Historia" ${book.category === 'Historia' ? 'selected' : ''}>Historia</option>
+                            <option value="Biografía" ${book.category === 'Biografía' ? 'selected' : ''}>Biografía</option>
+                            <option value="Educación" ${book.category === 'Educación' ? 'selected' : ''}>Educación</option>
+                            <option value="Arte" ${book.category === 'Arte' ? 'selected' : ''}>Arte</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Descripción *</label>
+                        <textarea name="description" required class="form-input" rows="4">${book.description}</textarea>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Páginas</label>
+                            <input type="number" name="pages" value="${book.pages || 0}" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Año</label>
+                            <input type="number" name="year" value="${book.year || new Date().getFullYear()}" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Cambiar portada (opcional)</label>
+                        <input type="file" name="cover" id="editCoverFile" accept="image/*" class="form-input">
+                        <p class="form-hint">Deja en blanco para mantener la portada actual</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Cambiar PDF (opcional)</label>
+                        <input type="file" name="pdf" id="editPdfFile" accept="application/pdf" class="form-input">
+                        <p class="form-hint">Deja en blanco para mantener el PDF actual</p>
+                    </div>
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">Guardar Cambios</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
+
+    document.getElementById('editForm').addEventListener('submit', (e) => handleEditSubmit(e, bookId));
+}
+
+function closeEditModal() {
+    const modal = document.getElementById('editModal');
+    if (modal) {
+        modal.remove();
+        document.body.style.overflow = 'auto';
+    }
+}
+
+async function handleEditSubmit(e, bookId) {
+    e.preventDefault();
+    
+    const form = e.target;
+    const formData = new FormData(form);
+    const submitBtn = form.querySelector('button[type="submit"]');
+    
+    const coverFile = formData.get('cover');
+    const pdfFile = formData.get('pdf');
+    
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Guardando...';
+
+    const book = booksData.find(b => b.id === bookId);
+    if (!book) return;
+
+    try {
+        const updateData = {
+            title: formData.get('title'),
+            author: formData.get('author'),
+            category: formData.get('category'),
+            description: formData.get('description'),
+            pages: parseInt(formData.get('pages')) || 0,
+            year: parseInt(formData.get('year')) || new Date().getFullYear()
+        };
+
+        if (coverFile && coverFile.size > 0) {
+            updateData.coverUrl = await readFileAsDataURL(coverFile);
+        }
+        
+        if (pdfFile && pdfFile.size > 0) {
+            if (pdfFile.size > 50 * 1024 * 1024) {
+                alert('El archivo PDF es demasiado grande. Máximo 50MB');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Guardar Cambios';
+                return;
+            }
+            const pdfDataUrl = await readFileAsDataURL(pdfFile);
+            await savePDFToIndexedDB(bookId, pdfDataUrl);
+            updateData.hasPDF = true;
+            updateData.content = 'PDF: ' + pdfFile.name;
+        }
+
+        updateBook(bookId, updateData);
+        alert('¡Libro actualizado exitosamente!');
+        closeEditModal();
+        loadBooksFromStorage();
+        displayBooks(booksData);
+    } catch (error) {
+        console.error('Error updating book:', error);
+        alert('Error al actualizar el libro: ' + error.message);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Guardar Cambios';
+    }
+}
+
+async function confirmDeleteBook(bookId) {
+    const book = booksData.find(b => b.id === bookId);
+    if (!book) return;
+    
+    if (book.uploadedBy !== AuthService.currentUser?.uid) {
+        alert('Solo puedes eliminar tus propios libros');
+        return;
+    }
+    
+    if (confirm(`¿Estás seguro de que quieres eliminar "${book.title}"? Esta acción no se puede deshacer.`)) {
+        await deleteBook(bookId);
+        alert('Libro eliminado exitosamente');
+        closeModal();
+        loadBooksFromStorage();
+        displayBooks(booksData);
+    }
 }
 
 // ========== MODAL FUNCTIONS ========== //
@@ -597,6 +890,8 @@ function openBookModal(bookId) {
     const modal = document.getElementById('bookModal');
     if (!modal) return;
 
+    const isOwner = AuthService.isAuthenticated() && selectedBook.uploadedBy === AuthService.currentUser.uid;
+
     document.getElementById('modalCover').src = selectedBook.coverUrl || 'https://via.placeholder.com/300x400?text=Sin+Portada';
     document.getElementById('modalTitle').textContent = selectedBook.title;
     document.getElementById('modalAuthor').textContent = `Por ${selectedBook.author}`;
@@ -604,6 +899,41 @@ function openBookModal(bookId) {
     document.getElementById('modalCategory').textContent = selectedBook.category;
     document.getElementById('modalPages').textContent = selectedBook.pages || 'N/A';
     document.getElementById('modalYear').textContent = selectedBook.year || 'N/A';
+
+    const modalActions = modal.querySelector('.modal-actions');
+    if (modalActions) {
+        modalActions.innerHTML = `
+            <button class="btn btn-primary" onclick="startReading()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+                Leer Ahora
+            </button>
+            <button class="btn btn-secondary" onclick="addToFavorites()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+                Favoritos
+            </button>
+            ${isOwner ? `
+                <button class="btn btn-secondary" onclick="openEditModal('${selectedBook.id}')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    Editar
+                </button>
+                <button class="btn btn-danger" onclick="confirmDeleteBook('${selectedBook.id}')" style="background: #dc2626;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    Eliminar
+                </button>
+            ` : ''}
+        `;
+    }
 
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
@@ -661,8 +991,16 @@ function initFavorites() {
     displayBooks(favoriteBooks);
 }
 
+// ========== MY LIBRARY FUNCTIONS ========== //
+function initLibrary() {
+    loadBooksFromStorage();
+    const userBooks = getUserBooks();
+    displayBooks(userBooks);
+    setupUploadButton();
+}
+
 // ========== READER FUNCTIONS ========== //
-function initReader() {
+async function initReader() {
     const currentBookData = localStorage.getItem('currentBook');
     if (!currentBookData) {
         window.location.href = 'catalog.html';
@@ -678,19 +1016,52 @@ function initReader() {
     }
     
     if (readerContent) {
-        readerContent.innerHTML = `
-            <div class="reader-text">
-                <h1>${book.title}</h1>
-                <h2>Por ${book.author}</h2>
-                <div class="reader-content-text">
-                    ${book.content ? book.content.split('\n').map(p => `<p>${p}</p>`).join('') : '<p>Contenido del libro no disponible.</p>'}
+        if (book.hasPDF) {
+            try {
+                const pdfDataUrl = await getPDFFromIndexedDB(book.id);
+                if (pdfDataUrl && pdfDataUrl.startsWith('data:application/pdf')) {
+                    readerContent.innerHTML = `
+                        <div class="pdf-reader-container" style="width: 100%; height: 100vh;">
+                            <div style="background: var(--gray-100); padding: 1rem; border-bottom: 1px solid var(--gray-300);">
+                                <h2 style="margin: 0; font-size: 1.5rem; color: var(--gray-900);">${book.title}</h2>
+                                <p style="margin: 0.5rem 0 0; color: var(--gray-600);">Por ${book.author}</p>
+                            </div>
+                            <iframe src="${pdfDataUrl}" style="width: 100%; height: calc(100vh - 120px); border: none;" title="${book.title}"></iframe>
+                        </div>
+                    `;
+                } else {
+                    readerContent.innerHTML = `
+                        <div class="reader-text">
+                            <h1>${book.title}</h1>
+                            <h2>Por ${book.author}</h2>
+                            <p style="color: var(--red-600); padding: 2rem;">Error: No se pudo cargar el PDF. El archivo podría estar corrupto.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading PDF:', error);
+                readerContent.innerHTML = `
+                    <div class="reader-text">
+                        <h1>${book.title}</h1>
+                        <h2>Por ${book.author}</h2>
+                        <p style="color: var(--red-600); padding: 2rem;">Error al cargar el PDF: ${error.message}</p>
+                    </div>
+                `;
+            }
+        } else {
+            readerContent.innerHTML = `
+                <div class="reader-text">
+                    <h1>${book.title}</h1>
+                    <h2>Por ${book.author}</h2>
+                    <div class="reader-content-text">
+                        ${book.content ? book.content.split('\n').map(p => `<p>${p}</p>`).join('') : '<p>Contenido del libro no disponible.</p>'}
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+            loadSettings();
+            applyReaderSettings();
+        }
     }
-    
-    loadSettings();
-    applyReaderSettings();
     
     // Simular progreso de lectura
     window.addEventListener('scroll', updateReadingProgress);
@@ -960,7 +1331,14 @@ function closeMobileMenu() {
 }
 
 // ========== INITIALIZATION ========== //
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        await initIndexedDB();
+        console.log('✅ IndexedDB inicializado correctamente');
+    } catch (error) {
+        console.error('❌ Error al inicializar IndexedDB:', error);
+    }
+    
     loadSettings();
     applyVisualSettings();
     AuthService.init();
@@ -982,6 +1360,8 @@ document.addEventListener('DOMContentLoaded', () => {
         initCatalog();
     } else if (path.includes('favorites.html')) {
         initFavorites();
+    } else if (path.includes('library.html')) {
+        initLibrary();
     } else if (path.includes('reader.html')) {
         initReader();
     } else if (path.includes('settings.html')) {
