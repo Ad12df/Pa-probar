@@ -326,48 +326,48 @@ function loadBooksFromStorage() {
     if (saved) {
         booksData = JSON.parse(saved);
     } else {
-        // Datos de demostración iniciales
+        // Libros iniciales de la biblioteca
         booksData = [
             {
-                id: 'book_1',
-                title: 'El Arte de la Programación',
-                author: 'Donald Knuth',
-                category: 'Tecnología',
-                description: 'Una obra maestra sobre algoritmos y estructuras de datos. Esencial para todo programador que quiera dominar los fundamentos de la informática.',
-                pages: 672,
-                year: 1968,
-                coverUrl: 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=400&h=600&fit=crop',
-                pdfUrl: '',
-                content: 'Este libro es una introducción completa a los algoritmos y estructuras de datos...',
-                uploadedBy: 'system',
-                createdAt: new Date().toISOString()
-            },
-            {
-                id: 'book_2',
-                title: 'Cien Años de Soledad',
-                author: 'Gabriel García Márquez',
-                category: 'Ficción',
-                description: 'La obra cumbre del realismo mágico que narra la historia de la familia Buendía a lo largo de siete generaciones en el pueblo ficticio de Macondo.',
-                pages: 471,
-                year: 1967,
-                coverUrl: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=600&fit=crop',
-                pdfUrl: '',
-                content: 'Muchos años después, frente al pelotón de fusilamiento...',
-                uploadedBy: 'system',
-                createdAt: new Date().toISOString()
-            },
-            {
-                id: 'book_3',
-                title: 'Sapiens: De animales a dioses',
-                author: 'Yuval Noah Harari',
-                category: 'Historia',
-                description: 'Una exploración fascinante de la historia de la humanidad, desde los primeros humanos hasta la actualidad, con una visión única sobre nuestro futuro.',
-                pages: 498,
+                id: 'book_nocturne',
+                title: 'Nocturne',
+                author: 'Nick Kyme',
+                category: 'Ciencia Ficción',
+                description: 'La guerra ha llegado a Nocturne. Tras décadas de planificación y masacres, Nihilan ha reunido a una inmensa flota de Guerreros Dragón, Eldars Oscuros y Renegados del Caos. En nombre de la venganza lanza su ataque. El Libro de Fuego 3.',
+                pages: 450,
                 year: 2011,
-                coverUrl: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=400&h=600&fit=crop',
-                pdfUrl: '',
-                content: 'Hace unos 13.500 millones de años, materia, energía, tiempo y espacio surgieron en lo que se conoce como el Big Bang...',
-                uploadedBy: 'system',
+                coverUrl: 'https://images.unsplash.com/photo-1614732414444-096e5f1122d5?w=400&h=600&fit=crop',
+                pdfUrl: 'books/Nocturne.pdf',
+                hasPDF: true,
+                uploadedBy: 'admin',
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 'book_draco',
+                title: 'Draco de Fuego',
+                author: 'Nick Kyme',
+                category: 'Ciencia Ficción',
+                description: 'El capellán Elysius de los Salamandra ha sido apresado por los eldars oscuros y los Dracos de Fuego de la 1ª Compañía planean una audaz misión de rescate. Warhammer 40000 - El Libro de Fuego 2.',
+                pages: 380,
+                year: 2010,
+                coverUrl: 'https://images.unsplash.com/photo-1551269901-5c5e14c25df7?w=400&h=600&fit=crop',
+                pdfUrl: 'books/Draco_de_fuego.pdf',
+                hasPDF: true,
+                uploadedBy: 'admin',
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 'book_salamandra',
+                title: 'Salamandra',
+                author: 'Nick Kyme',
+                category: 'Ciencia Ficción',
+                description: 'Los Marines Espaciales del capítulo Salamandra se dirigen, guiados por una antigua profecía, a un planeta plagado de misterios. Warhammer 40000 - El Libro de Fuego 1.',
+                pages: 420,
+                year: 2009,
+                coverUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=400&h=600&fit=crop',
+                pdfUrl: 'books/Salamandra.pdf',
+                hasPDF: true,
+                uploadedBy: 'admin',
                 createdAt: new Date().toISOString()
             }
         ];
@@ -1031,7 +1031,15 @@ function quickRead(bookId) {
 // ========== HOME FUNCTIONS ========== //
 function initHome() {
     loadBooksFromStorage();
+    updateBookCount();
     displaySuggestedBooks();
+}
+
+function updateBookCount() {
+    const countElement = document.getElementById('totalBooksCount');
+    if (countElement) {
+        countElement.textContent = booksData.length;
+    }
 }
 
 function displaySuggestedBooks() {

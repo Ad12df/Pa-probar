@@ -1,283 +1,58 @@
 # BiblioDigital - Biblioteca Digital Personal
 
-## 📚 Descripción del Proyecto
+## Overview
+BiblioDigital is a personal digital library web application designed to allow users to manage, read, and organize their digital books. The project utilizes local storage mechanisms (localStorage and IndexedDB) to operate entirely without a backend or external database. It offers a rich user experience with features like book cataloging, personalized reading settings, and a responsive design. The vision is to provide a fully client-side, privacy-focused digital library solution that is easy to use and completely free from external service dependencies for its core functionality.
 
-BiblioDigital es una aplicación web de biblioteca digital personal que permite a los usuarios gestionar, leer y organizar sus libros digitales. El proyecto utiliza almacenamiento local (localStorage) para guardar todos los datos, lo que significa que funciona completamente sin necesidad de un backend o base de datos externa.
+## User Preferences
+No explicit user preferences were provided in the original `replit.md` file.
 
-## 🎯 Características Principales
+## System Architecture
 
-### ✅ Gestión de Libros
-- **Catálogo de libros** con búsqueda y filtros por categoría
-- **Subida de libros** con portada personalizada (imágenes convertidas a base64)
-- **Libros de demostración** incluidos para empezar
-- **Favoritos** para marcar libros preferidos
-- **Lector integrado** con ajustes personalizables
+### UI/UX Decisions
+-   **Responsive Design**: Fully adapted for mobile, tablets, and desktop with a professional and modern interface. This includes a collapsible sidebar on mobile and optimized layouts for various screen sizes and orientations.
+-   **Theming**: 9 modern visual themes are available, each with a complete color palette, custom gradients, shadows, and adapted styles for all UI elements (sidebar, cards, modals, forms). Themes are designed for excellent contrast and perfect legibility across all text elements (page-title, section-title, labels, etc.).
+-   **Authentication Flow**: Designed for optional local authentication. Users can explore content as guests without logging in, with login only required for uploading personal books.
 
-### ✅ Autenticación Local (Opcional)
-- **Acceso libre**: Puedes explorar el catálogo, favoritos, biblioteca y ajustes sin iniciar sesión
-- **Modo invitado**: Navega la app como invitado sin restricciones
-- **Inicio de sesión opcional**: Solo necesario para subir tus propios libros
-- Registro e inicio de sesión usando localStorage
-- No requiere servidor de autenticación
-- Datos de usuario almacenados localmente en el navegador
+### Technical Implementations
+-   **Frontend**: Built using HTML5 for structure, CSS3 with variables for styling and responsive design, and Vanilla JavaScript for application logic.
+-   **Book Management**:
+    -   Catalog with search and category filters.
+    -   Book uploads with custom covers (images converted to base64).
+    -   Includes demo books and a favorites feature.
+    -   Integrated reader with customizable font size and theme.
+-   **Local Authentication**:
+    -   User registration and login handled via localStorage.
+    -   User data stored locally in the browser; no external authentication server required.
+-   **Customizable Settings**:
+    -   User profile editing (name, email).
+    -   Configurable visual themes, global font size, reader theme (Light, Dark, Sepia).
+    -   Notification preferences and password change (for local authentication).
 
-### ✅ Configuración Personalizable
-- **Perfil de usuario**: Edición de nombre y correo
-- **Temas visuales**: 6 temas modernos (Clásico, Oscuro, Sepia, Océano, Bosque, Púrpura)
-- **Tamaño de fuente**: Global y del lector
-- **Tema del lector**: Claro, Oscuro, Sepia
-- **Notificaciones**: Preferencias de avisos y recordatorios
-- **Seguridad**: Cambio de contraseña
+### System Design Choices
+-   **Local Storage First**: The core design principle is to be fully client-side, using the browser's local storage capabilities.
+    -   **localStorage**: Used for user data (authentication), book metadata (title, author, category, description), favorites, custom settings, and book covers (base64 images).
+    -   **IndexedDB**: Employed for storing large binary files, specifically complete PDF files (up to 50MB per file). This overcomes the ~5MB limit of localStorage and is optimized for binary data, offering better performance and asynchronous operations. The database is `BiblioDigitalDB` with an object store `pdfs` where the key is `bookId` and the value is `pdfDataUrl` (base64 encoded PDF).
+-   **Server**: A simple Python 3 `http.server` is used for serving static files during development, configured to run on `0.0.0.0:5000` (Replit compatible) with caching disabled for development.
+-   **Security Considerations (Development)**: The project acknowledges that its local authentication and storage methods are for demonstration. For production, it strongly recommends implementing password hashing, real JWT-based authentication, HTTPS, input validation, and sanitization to prevent XSS.
 
-### ✅ Diseño Responsivo
-- Completamente adaptado para móviles, tablets y escritorio
-- Menú lateral colapsable en móviles
-- Interfaz profesional y moderna
-- Optimizado para todos los tamaños de pantalla
+## External Dependencies
+-   **Python 3**: Used for the `http.server` module to serve static files.
+-   **Firebase**: Configuration files (`firebase.json`, `.firebaserc`, `firestore.rules`, `storage.rules`, `firestore.indexes.json`) are included for optional future deployment, indicating potential integration for cloud features like user data, book storage, and libraries. However, the core application functions without active Firebase integration, relying solely on local storage.
 
-## 🛠 Tecnologías Utilizadas
+## Current Library Content
+The application currently includes 3 books from the Warhammer 40,000 universe - "El Libro de Fuego" series by Nick Kyme:
+1. **Salamandra** (El Libro de Fuego 1, 2009) - PDF stored in `/books/Salamandra.pdf`
+2. **Draco de Fuego** (El Libro de Fuego 2, 2010) - PDF stored in `/books/Draco_de_fuego.pdf`
+3. **Nocturne** (El Libro de Fuego 3, 2011) - PDF stored in `/books/Nocturne.pdf`
 
-### Frontend
-- **HTML5** - Estructura de las páginas
-- **CSS3** - Estilos con variables CSS y diseño responsivo
-- **JavaScript (Vanilla)** - Lógica de la aplicación sin frameworks
+All PDFs are stored in the `/books/` directory (excluded from git via .gitignore).
 
-### Almacenamiento
-- **localStorage** - Almacenamiento local del navegador para:
-  - Datos de usuario (autenticación)
-  - Metadatos de libros (título, autor, categoría, descripción)
-  - Favoritos
-  - Configuración personalizada
-  - Portadas de libros (imágenes en base64, ~100-500KB)
-- **IndexedDB** - Base de datos del navegador para:
-  - Archivos PDF completos (hasta 50MB por archivo)
-  - Permite almacenar archivos binarios grandes que exceden el límite de localStorage (~5MB total)
-  - Base de datos: BiblioDigitalDB
-  - Object Store: pdfs (clave: bookId)
-
-### Servidor
-- **Python 3** - Servidor HTTP simple
-- **http.server** - Módulo estándar de Python para servir archivos estáticos
-
-## 📁 Estructura del Proyecto
-
-```
-/
-├── index.html              # Página de inicio
-├── login.html              # Página de autenticación
-├── catalog.html            # Catálogo de libros
-├── library.html            # Mi Biblioteca (libros del usuario)
-├── favorites.html          # Libros favoritos
-├── reader.html             # Lector de libros
-├── settings.html           # Configuración
-├── styles.css              # Estilos globales con responsive design
-├── app-localStorage.js     # Lógica principal (localStorage + IndexedDB)
-├── firebase-config.js      # Configuración de almacenamiento local
-├── server.py               # Servidor HTTP Python
-├── .gitignore              # Archivos ignorados por Git
-└── replit.md               # Esta documentación
-```
-
-## 🚀 Cómo Funciona
-
-### Flujo de Usuario
-
-1. **Registro/Login**: El usuario crea una cuenta o inicia sesión
-2. **Explorar Catálogo**: Ve los libros disponibles con filtros y búsqueda
-3. **Subir Libros**: Puede agregar sus propios libros con portada
-4. **Leer**: Abre el lector integrado con controles de fuente y tema
-5. **Favoritos**: Marca libros para acceso rápido
-6. **Configurar**: Personaliza la experiencia visual y funcional
-
-### Almacenamiento Local
-
-**localStorage** - Metadatos y configuración:
-- `biblioUser` - Información del usuario actual
-- `biblioBooks` - Array de metadatos de libros (NO incluye PDFs)
-- `userSettings` - Configuración personalizada
-- `biblioFavorites` - IDs de libros favoritos
-- `userPassword` - Contraseña (solo para demostración)
-- `currentBook` - Libro siendo leído actualmente
-
-**IndexedDB (BiblioDigitalDB)** - Archivos PDF:
-- Object Store: `pdfs`
-- Clave: `bookId` (ID único del libro)
-- Valor: `pdfDataUrl` (archivo PDF en formato base64)
-- Límite práctico: ~50MB por archivo
-
-## 🎨 Características de Diseño
-
-### Temas Disponibles
-1. **Clásico** - Tema Original Profesional (por defecto)
-2. **Oscuro** - Modo Nocturno con paleta dark
-3. **Sepia** - Estilo Vintage cálido
-4. **Océano** - Azul Refrescante y limpio
-5. **Bosque** - Verde Natural relajante
-6. **Púrpura** - Sueño Moderno vibrante
-7. **Coral** - Atardecer Cálido con tonos naranja
-8. **Azul Medianoche** - Elegante tema oscuro azul
-9. **Menta** - Fresco y Vibrante verde agua
-
-Cada tema incluye:
-- Paleta de colores completa con excelente contraste
-- Gradientes personalizados
-- Sombras y efectos específicos
-- Estilos de sidebar, cards, modales y formularios adaptados
-- Texto perfectamente legible en todos los elementos
-
-### Responsive Design
-- **Desktop**: Layout completo con sidebar fija
-- **Tablet**: Adaptación de grid y espacios
-- **Mobile**: Menú hamburguesa, tarjetas apiladas
-- **Landscape**: Optimizaciones para orientación horizontal
-
-## 📝 Notas de Desarrollo
-
-### Por qué localStorage + IndexedDB en lugar de Firebase
-
-El proyecto originalmente estaba configurado para Firebase, pero se modificó para usar almacenamiento local por las siguientes razones:
-
-1. **No requiere credenciales de API**: Funciona sin configuración externa
-2. **Totalmente local**: Los datos permanecen en el navegador del usuario
-3. **Sin costos**: No hay límites ni tarifas de Firebase
-4. **Privacidad**: Los datos nunca salen del dispositivo del usuario
-5. **Simplicidad**: Más fácil de entender y mantener
-
-### Por qué IndexedDB para PDFs
-
-IndexedDB se utiliza específicamente para archivos PDF porque:
-
-1. **localStorage tiene límite de ~5MB**: No suficiente para PDFs
-2. **IndexedDB soporta almacenamientos grandes**: >50MB por archivo
-3. **Mejor rendimiento**: Optimizado para archivos binarios
-4. **Asíncrono**: No bloquea el hilo principal del navegador
-5. **API moderna**: Promesas nativas con async/await
-
-### Servidor de Desarrollo
-
-El servidor Python (`server.py`) está configurado para:
-- Servir en `0.0.0.0:5000` (compatible con Replit)
-- Deshabilitar caché para desarrollo
-- Servir archivos estáticos desde la raíz del proyecto
-
-## 🔧 Configuración en Replit
-
-### Workflow Configurado
-- **Nombre**: BiblioDigital Server
-- **Comando**: `python3 server.py`
-- **Puerto**: 5000
-- **Tipo**: Webview (vista previa de sitio web)
-
-### Variables de Entorno
-No se requieren variables de entorno ya que usa almacenamiento local.
-
-## 🌐 Acceso a la Aplicación
-
-Una vez que el servidor esté corriendo:
-1. La aplicación se abrirá automáticamente en la vista previa de Replit
-2. También puedes acceder desde cualquier navegador en: `http://localhost:5000`
-3. En Replit, usa el dominio público proporcionado
-
-## 📱 Uso de la Aplicación
-
-### Primera Vez
-1. Accede a la aplicación
-2. Haz clic en "Crear cuenta"
-3. Ingresa tu nombre, email y contraseña
-4. ¡Listo! Ya puedes explorar el catálogo
-
-### Subir un Libro
-1. Ve al Catálogo
-2. Haz clic en "Subir Libro"
-3. Completa el formulario:
-   - Título, autor, categoría, descripción
-   - Opcional: URL de portada o sube una imagen
-   - Contenido del libro (texto)
-4. Haz clic en "Subir Libro"
-
-### Personalizar
-1. Ve a Configuración
-2. Ajusta tu perfil
-3. Selecciona un tema visual
-4. Configura tamaños de fuente
-5. Activa/desactiva notificaciones
-
-## 🎓 Aprendizajes Técnicos
-
-Este proyecto demuestra:
-- Gestión de estado con JavaScript vanilla
-- Uso efectivo de localStorage
-- Diseño responsivo con CSS moderno
-- Manejo de archivos (imágenes a base64)
-- Arquitectura de SPA sin frameworks
-- Servidor HTTP simple con Python
-
-## 🔒 Seguridad
-
-**Nota importante**: Este es un proyecto de demostración. En producción:
-- NO almacenes contraseñas en texto plano
-- USA hash de contraseñas (bcrypt, etc.)
-- IMPLEMENTA autenticación real con JWT
-- USA HTTPS para comunicaciones
-- VALIDA inputs del usuario
-- SANITIZA contenido para prevenir XSS
-
-## 📄 Licencia
-
-Este proyecto es de código abierto y está disponible para fines educativos.
-
-## 🚀 Mejoras Futuras
-
-### Recomendaciones Técnicas
-1. **Modo privado del navegador**: Implementar fallback si IndexedDB no está disponible
-2. **Optimización de memoria**: Considerar almacenar PDFs como Blob en lugar de base64 para reducir overhead
-3. **Monitoreo de rendimiento**: Agregar métricas para PDFs grandes (>10MB)
-4. **Tests de integración**: Cubrir flujos completos upload → edit → read → delete
-
-### Funcionalidades Adicionales
-1. **Lectura de PDFs real**: Integrar PDF.js para visualización avanzada
-2. **Sincronización cloud**: Opcional con Google Drive o Dropbox
-3. **Lector mejorado**: Paginación, marcadores, anotaciones
-4. **Estadísticas de lectura**: Tiempo leído, progreso, libros completados
-5. **Service Workers**: Modo sin conexión completo
-6. **Exportar/Importar**: Backup de biblioteca completa
-7. **Búsqueda de contenido**: Buscar texto dentro de los PDFs
-
----
-
-## 🔄 Historial de Cambios
-
-### Octubre 2025 - Versión 2.3
-- ✅ **Contraste perfecto garantizado**: Todos los 9 temas ahora tienen estilos explícitos para cada elemento de texto
-- ✅ **Elementos de texto cubiertos**: page-title, page-subtitle, section-title, section-description, labels, form-hint, switch-label
-- ✅ **Paletas optimizadas**: Cada tema usa colores oscuros sobre fondos claros o claros sobre fondos oscuros con ratio WCAG
-- ✅ **Formularios completamente legibles**: Inputs, textareas y selects con colores de texto explícitos
-- ✅ **Sin problemas de herencia CSS**: Ya no se depende solo de variables CSS que podían causar problemas de contraste
-
-### Octubre 2025 - Versión 2.2
-- ✅ **3 Nuevos temas visuales**: Coral (atardecer cálido), Azul Medianoche (elegante oscuro), Menta (fresco vibrante)
-- ✅ **Corrección de bugs visuales**: Todos los temas ahora tienen excelente contraste y legibilidad perfecta
-- ✅ **Mejoras en formularios**: Inputs, selects y textareas correctamente estilizados en todos los temas
-- ✅ **Total de 9 temas disponibles**: Amplia variedad de opciones de personalización visual
-
-### Octubre 2025 - Versión 2.1
-- ✅ **Acceso libre sin autenticación**: Ahora puedes explorar catálogo, favoritos, biblioteca y ajustes sin iniciar sesión
-- ✅ **Modo invitado mejorado**: Interfaz adaptada para usuarios no autenticados con indicador "Invitado"
-- ✅ **Botón inteligente de subir**: Muestra "Inicia sesión para subir" o "Subir libro" según el estado de sesión
-- ✅ **Nuevos temas modernos**: 6 temas visuales completamente rediseñados (Clásico, Oscuro, Sepia, Océano, Bosque, Púrpura)
-- ✅ **Mejoras de UX**: Flujo de autenticación simplificado y más intuitivo
-
-### Octubre 2025 - Versión 2.0
-- ✅ **Migración a IndexedDB**: Implementado almacenamiento de PDFs en IndexedDB para superar el límite de 5MB de localStorage
-- ✅ **Bibliotecas por usuario**: Cada usuario ahora tiene su propia biblioteca de libros separada
-- ✅ **Página "Mi Biblioteca"**: Nueva sección para gestionar únicamente los libros subidos por el usuario
-- ✅ **Funcionalidad completa de PDFs**: Subir, editar, eliminar y leer archivos PDF reales (hasta 50MB)
-- ✅ **Corrección de logout**: El botón de cerrar sesión ahora funciona correctamente
-- ✅ **Servidor optimizado**: Configuración SO_REUSEADDR para mejor manejo de puertos
-- ✅ **Limpieza de código**: Eliminados archivos obsoletos de Firebase
-
----
-
-**Desarrollado para Replit** 🚀
-Fecha: Octubre 2025
-Versión: 2.2
+## Recent Changes
+### October 2025
+- ✅ Removed all demo books (El Arte de la Programación, Cien Años de Soledad, Sapiens)
+- ✅ Added 3 Warhammer 40K books with physical PDF files
+- ✅ Created `/books/` folder for PDF storage
+- ✅ Fixed homepage counter to display dynamic book count (now shows actual number of books)
+- ✅ Updated .gitignore to exclude books folder
+- ✅ Firebase configuration files created for future deployment
+- ✅ Removed "Oscuro - Modo Nocturno" theme (8 themes now available)

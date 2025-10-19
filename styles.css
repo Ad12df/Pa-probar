@@ -232,6 +232,16 @@ img {
     font-family: var(--font-sans);
     transition: all var(--transition-base);
     background: white;
+    color: #1f2937 !important;
+}
+
+.form-group input::placeholder {
+    color: #9ca3af !important;
+}
+
+.form-group select option {
+    color: #1f2937 !important;
+    background: white;
 }
 
 .form-group input:focus,
@@ -2098,6 +2108,33 @@ body[data-theme="brutalism"] .page-title {
 textarea.form-input {
     resize: vertical;
     min-height: 100px;
+    color: #1f2937 !important;
+}
+
+textarea.form-input::placeholder {
+    color: #9ca3af !important;
+}
+
+/* Estilos globales para asegurar legibilidad de texto */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="url"],
+textarea,
+select {
+    color: #1f2937 !important;
+    background-color: white;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #9ca3af !important;
+}
+
+select option {
+    color: #1f2937 !important;
+    background: white;
 }
 
 .form-group {
@@ -2173,123 +2210,6 @@ div[onclick*="pdfInput"]:hover {
 /* ========== RESPONSIVE MOBILE STYLES ========== */
 
 /* ========== TEMAS DE LA APLICACIÓN ========== */
-
-/* Tema Dark/Oscuro */
-body[data-theme="dark"] {
-    --gray-50: #111827;
-    --gray-100: #1f2937;
-    --gray-200: #374151;
-    --gray-300: #4b5563;
-    --gray-400: #6b7280;
-    --gray-500: #9ca3af;
-    --gray-600: #d1d5db;
-    --gray-700: #e5e7eb;
-    --gray-800: #f3f4f6;
-    --gray-900: #f9fafb;
-    
-    background-color: #0f172a;
-    color: var(--gray-800);
-}
-
-body[data-theme="dark"] .sidebar {
-    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-    border-right: 1px solid #334155;
-}
-
-body[data-theme="dark"] .nav-item {
-    color: var(--gray-600);
-}
-
-body[data-theme="dark"] .nav-item:hover,
-body[data-theme="dark"] .nav-item.active {
-    background: rgba(14, 165, 233, 0.1);
-    color: #38bdf8;
-}
-
-body[data-theme="dark"] .main-content {
-    background-color: #0f172a;
-}
-
-body[data-theme="dark"] .hero-section {
-    background: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 100%);
-}
-
-body[data-theme="dark"] .stat-card,
-body[data-theme="dark"] .feature-card,
-body[data-theme="dark"] .step-card {
-    background: #1e293b;
-    border: 1px solid #334155;
-}
-
-body[data-theme="dark"] .book-card {
-    background: #1e293b;
-    border: 1px solid #334155;
-}
-
-body[data-theme="dark"] .book-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 40px rgba(14, 165, 233, 0.3);
-    border-color: #38bdf8;
-}
-
-body[data-theme="dark"] .modal-content {
-    background: #1e293b;
-    border: 1px solid #334155;
-}
-
-body[data-theme="dark"] .form-input,
-body[data-theme="dark"] input,
-body[data-theme="dark"] textarea,
-body[data-theme="dark"] select {
-    background: #0f172a;
-    border-color: #334155;
-    color: var(--gray-800);
-}
-
-body[data-theme="dark"] .form-input:focus,
-body[data-theme="dark"] input:focus,
-body[data-theme="dark"] textarea:focus,
-body[data-theme="dark"] select:focus {
-    border-color: #38bdf8;
-    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
-}
-
-body[data-theme="dark"] .settings-section {
-    background: #1e293b;
-    border: 1px solid #334155;
-}
-
-body[data-theme="dark"] .page-title,
-body[data-theme="dark"] .section-title {
-    color: #f9fafb;
-}
-
-body[data-theme="dark"] .page-subtitle,
-body[data-theme="dark"] label,
-body[data-theme="dark"] .switch-label {
-    color: #d1d5db;
-}
-
-body[data-theme="dark"] .form-hint {
-    color: #9ca3af;
-}
-
-body[data-theme="dark"] .section-title-large {
-    color: #f9fafb;
-}
-
-body[data-theme="dark"] .section-description {
-    color: #d1d5db;
-}
-
-body[data-theme="dark"] .sidebar-title,
-body[data-theme="dark"] .user-name {
-    color: var(--gray-800);
-}
-
-body[data-theme="dark"] .user-email {
-    color: var(--gray-600);
-}
 
 /* Tema Sepia/Vintage */
 body[data-theme="sepia"] {

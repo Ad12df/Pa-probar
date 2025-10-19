@@ -36,7 +36,23 @@ Thumbs.db
 *.db
 *.sqlite
 
+# Books folder (PDFs)
+books/
+
 # Sensitive files
 .env
 .env.local
 firebase-credentials.json
+
+# Firebase
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+firestore-debug.log
+ui-debug.log
+storage-debug.log
+
+# Firebase Functions (si se usan en el futuro)
+functions/node_modules/
+functions/.env
+functions/lib/
