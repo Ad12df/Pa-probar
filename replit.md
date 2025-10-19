@@ -114,12 +114,16 @@ BiblioDigital es una aplicación web de biblioteca digital personal que permite 
 4. **Océano** - Azul Refrescante y limpio
 5. **Bosque** - Verde Natural relajante
 6. **Púrpura** - Sueño Moderno vibrante
+7. **Coral** - Atardecer Cálido con tonos naranja
+8. **Azul Medianoche** - Elegante tema oscuro azul
+9. **Menta** - Fresco y Vibrante verde agua
 
 Cada tema incluye:
-- Paleta de colores completa
+- Paleta de colores completa con excelente contraste
 - Gradientes personalizados
 - Sombras y efectos específicos
-- Estilos de sidebar, cards y modales adaptados
+- Estilos de sidebar, cards, modales y formularios adaptados
+- Texto perfectamente legible en todos los elementos
 
 ### Responsive Design
 - **Desktop**: Layout completo con sidebar fija
@@ -243,6 +247,19 @@ Este proyecto es de código abierto y está disponible para fines educativos.
 
 ## 🔄 Historial de Cambios
 
+### Octubre 2025 - Versión 2.3
+- ✅ **Contraste perfecto garantizado**: Todos los 9 temas ahora tienen estilos explícitos para cada elemento de texto
+- ✅ **Elementos de texto cubiertos**: page-title, page-subtitle, section-title, section-description, labels, form-hint, switch-label
+- ✅ **Paletas optimizadas**: Cada tema usa colores oscuros sobre fondos claros o claros sobre fondos oscuros con ratio WCAG
+- ✅ **Formularios completamente legibles**: Inputs, textareas y selects con colores de texto explícitos
+- ✅ **Sin problemas de herencia CSS**: Ya no se depende solo de variables CSS que podían causar problemas de contraste
+
+### Octubre 2025 - Versión 2.2
+- ✅ **3 Nuevos temas visuales**: Coral (atardecer cálido), Azul Medianoche (elegante oscuro), Menta (fresco vibrante)
+- ✅ **Corrección de bugs visuales**: Todos los temas ahora tienen excelente contraste y legibilidad perfecta
+- ✅ **Mejoras en formularios**: Inputs, selects y textareas correctamente estilizados en todos los temas
+- ✅ **Total de 9 temas disponibles**: Amplia variedad de opciones de personalización visual
+
 ### Octubre 2025 - Versión 2.1
 - ✅ **Acceso libre sin autenticación**: Ahora puedes explorar catálogo, favoritos, biblioteca y ajustes sin iniciar sesión
 - ✅ **Modo invitado mejorado**: Interfaz adaptada para usuarios no autenticados con indicador "Invitado"
@@ -263,4 +280,4 @@ Este proyecto es de código abierto y está disponible para fines educativos.
 
 **Desarrollado para Replit** 🚀
 Fecha: Octubre 2025
-Versión: 2.0
+Versión: 2.2
