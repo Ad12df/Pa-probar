@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+*.egg-info/
+
+# Logs
+*.log
+logs/
+/tmp/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Replit
+.replit
+.config/
+.upm/
+.cache/
+.breakpoints
+
+# Local storage (if using JSON files)
+*.db
+*.sqlite
+
+# Sensitive files
+.env
+.env.local
+firebase-credentials.json
